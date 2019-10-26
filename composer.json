@@ -1,0 +1,33 @@
+{
+    "name": "redmix0901/oauth2-client-sso",
+    "description": "Package kết hợp với oauth2 client tạo đăng nhập single sign on",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "sso",
+        "oauth2",
+        "laravel",
+        "client"
+    ],
+    "require": {
+        "league/oauth2-client": "^2.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "Redmix0901\\Oauth2Sso\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Tran Dinh Tu",
+            "email": "redmix0901@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+          "providers": [
+            "Redmix0901\\Oauth2Sso\\SsoServiceProvider"
+          ]
+        }
+    }
+}
