@@ -40,8 +40,8 @@ class SsoSessionGuard
         $resourceOwner = $request->get('oauth2_user');
 
         // Nếu chúng tôi đã truy xuất người dùng cho yêu cầu hiện tại, chúng tôi chỉ có thể
-        // trả lại ngay lập tức. Chúng tôi không muốn lấy dữ liệu người dùng trên
-        // mọi cuộc gọi đến phương thức này bởi vì điều đó sẽ rất chậm.
+        // trả lại ngay lập tức. Chúng tôi không muốn lấy dữ liệu người dùng trên
+        // mọi cuộc gọi đến phương thức này bởi vì điều đó sẽ rất chậm
         if (! is_null($this->user)) {
             return $this->user;
         }
