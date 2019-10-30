@@ -64,8 +64,6 @@ class OAuth2SsoMiddleware
             $action = [null];
         }
 
-        $response = $next($request);
-
         /** 
          *
          * @var \League\OAuth2\Client\Token\AccessToken $accessToken 
@@ -76,7 +74,7 @@ class OAuth2SsoMiddleware
          * Không có $accessToken tồn tại.
          */
         if (!$accessToken) {
-            return $this->redirectTo($request, $response, $action);
+            return $this->redirectTo($request, $next($request), $action);
         }
 
         try {
@@ -100,7 +98,7 @@ class OAuth2SsoMiddleware
              */
             $this->singleSignOn->deleteAccessTokenLocal();
 
-            return $this->redirectTo($request, $response, $action);
+            return $this->redirectTo($request, $next($request), $action);
         }
 
         $user = $resourceOwner->toArray();
@@ -111,12 +109,12 @@ class OAuth2SsoMiddleware
              */
             $this->singleSignOn->deleteAccessTokenLocal();
 
-            return $this->redirectTo($request, $response, $action);
+            return $this->redirectTo($request, $next($request), $action);
         }
         
         $request->attributes->add(['oauth2_user' => $resourceOwner]);
 
-        return $this->sendReponse($request, $response, $action);
+        return $this->sendReponse($request, $next($request), $action);
     }
 
     /**
