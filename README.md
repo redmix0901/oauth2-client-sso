@@ -63,13 +63,25 @@ Hoặc bạn phải gắn token vào header.
 'Authorization' => 'Bearer ' . $token
 ```
 
-Nếu muốn lấy thông tin user từ request có thể dùng cách sau.
+Chỉnh sửa config như sau:
 
 ``` php
-$request->get('oauth2_user')
+'defaults' => [
+    'guard' => 'oauth2',
+    'passwords' => 'users',
+],
+
+'guards' => [
+        ...
+    'oauth2' => [
+        'driver' => 'sso-session',
+    ]
+],
 ```
 
-Nếu muốn lấy thông tin user từ request API có thể dùng cách sau.
+> defaults là không bắt buộc. Nếu không chỉnh sửa defaults thì bạn có thể dùng auth()->guard('oauth2')->user()
+
+Nếu muốn lấy thông tin user từ request có thể dùng cách sau.
 
 ``` php
 $request->user()
