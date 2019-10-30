@@ -8,9 +8,12 @@ use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Redmix0901\Oauth2Sso\SingleSignOn;
 use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Auth\GuardHelpers;
 
 class SsoSessionGuard
 {
+    use GuardHelpers;
+
     /** 
      *@var SingleSignOn 
      */
@@ -36,13 +39,20 @@ class SsoSessionGuard
     {
         $resourceOwner = $request->get('oauth2_user');
 
-        if (! empty($resourceOwner)) {
-            return $this->singleSignOn->retrieveUser(
+        // Nếu chúng tôi đã truy xuất người dùng cho yêu cầu hiện tại, chúng tôi chỉ có thể
+        // trả lại ngay lập tức. Chúng tôi không muốn lấy dữ liệu người dùng trên
+        // mọi cuộc gọi đến phương thức này bởi vì điều đó sẽ rất chậm.
+        if (! is_null($this->user)) {
+            return $this->user;
+        }
+
+        if (is_null($this->user) && !empty($resourceOwner)) {
+            $this->user = $this->singleSignOn->retrieveUser(
                 $resourceOwner->toArray()
             );
         }
 
-        return null;
+        return $this->user;
     }
 
 }
