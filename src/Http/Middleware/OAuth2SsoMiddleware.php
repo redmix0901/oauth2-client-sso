@@ -116,7 +116,7 @@ class OAuth2SsoMiddleware
         
         $request->attributes->add(['oauth2_user' => $resourceOwner]);
 
-        return $this->sendReponseWithCreateTokenOnCookie($request, $response, $action);
+        return $this->sendReponse($request, $response, $action);
     }
 
     /**
@@ -129,7 +129,7 @@ class OAuth2SsoMiddleware
      * @param  string[]  ...$action
      * @return \Illuminate\Http\Response
      */
-    protected function sendReponseWithCreateTokenOnCookie($request, $response, $action)
+    protected function sendReponse($request, $response, $action)
     {
         if ($this->shouldReceiveFreshAccessToken($request, $response, $action)) {
 
@@ -208,6 +208,6 @@ class OAuth2SsoMiddleware
     {
         return  in_array(self::ACTION_REDIRECT, $action) 
                 ? $this->singleSignOn->getAuthRedirect() 
-                    : $this->sendReponseWithCreateTokenOnCookie($request, $response, $action) ;
+                    : $this->sendReponse($request, $response, $action) ;
     }
 }

@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
 
 use Redmix0901\Oauth2Sso\Guards\SsoGuard;
+use Redmix0901\Oauth2Sso\Guards\SsoSessionGuard;
 use Redmix0901\Oauth2Sso\Http\Middleware\OAuth2SsoMiddleware;
 use Redmix0901\Oauth2Sso\SingleSignOn;
 
@@ -54,8 +55,14 @@ class SsoServiceProvider extends ServiceProvider
      */
     protected function registerGuard()
     {
-        Auth::extend('sso', function ($app, $name, array $config) {
-            return tap($this->makeGuard($config), function ($guard) {
+        Auth::extend('sso-api', function ($app, $name, array $config) {
+            return tap($this->makeSsoGuard($config), function ($guard) {
+                $this->app->refresh('request', $guard, 'setRequest');
+            });
+        });
+
+        Auth::extend('sso-session', function ($app, $name, array $config) {
+            return tap($this->makeSsoSessionGuard($config), function ($guard) {
                 $this->app->refresh('request', $guard, 'setRequest');
             });
         });
@@ -67,12 +74,27 @@ class SsoServiceProvider extends ServiceProvider
      * @param  array  $config
      * @return \Illuminate\Auth\RequestGuard
      */
-    protected function makeGuard(array $config)
+    protected function makeSsoGuard(array $config)
     {
         return new RequestGuard(function ($request) use ($config) {
             return (new SsoGuard(
                 $this->app->make(SingleSignOn::class),
                 $this->app->make('encrypter')
+            ))->user($request);
+        }, $this->app['request']);
+    }
+
+    /**
+     * Make an instance of the guard.
+     *
+     * @param  array  $config
+     * @return \Illuminate\Auth\RequestGuard
+     */
+    protected function makeSsoSessionGuard(array $config)
+    {
+        return new RequestGuard(function ($request) use ($config) {
+            return (new SsoSessionGuard(
+                $this->app->make(SingleSignOn::class)
             ))->user($request);
         }, $this->app['request']);
     }
