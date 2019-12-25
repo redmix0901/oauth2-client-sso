@@ -42,7 +42,7 @@ Nếu cần xác thực Token của user từ Resource Server lên (Auth Server)
 
 ``` php
 'api' => [
-    'driver' => 'sso',
+    'driver' => 'sso-api',
     'provider' => 'users',
     'hash' => false,
 ]
