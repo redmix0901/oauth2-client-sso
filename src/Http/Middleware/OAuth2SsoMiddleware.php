@@ -30,9 +30,8 @@ class OAuth2SsoMiddleware
     protected $singleSignOn;
 
     /**
-     * The API token cookie factory instance.
      *
-     * @var \Laravel\Passport\ApiTokenCookieFactory
+     * @var Illuminate\Contracts\Config\\Repository
      */
     protected $config;
 

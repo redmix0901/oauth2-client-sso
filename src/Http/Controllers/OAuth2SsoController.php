@@ -9,6 +9,7 @@ use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use Redmix0901\Oauth2Sso\Events\UserSsoLogin;
 use Redmix0901\Oauth2Sso\Events\AccessTokenCreated;
 use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Contracts\Config\Repository as Config;
 
 class OAuth2SsoController extends Controller
 {
@@ -25,12 +26,19 @@ class OAuth2SsoController extends Controller
     protected $singleSignOn;
 
     /**
+     *
+     * @var Illuminate\Contracts\Config\\Repository
+     */
+    protected $config;
+
+    /**
      * Create a new controller instance.
      *
      * @return void
      */
-    public function __construct(SingleSignOn $singleSignOn, Dispatcher $events)
+    public function __construct(SingleSignOn $singleSignOn, Dispatcher $events, Config $config)
     {
+        $this->config = $config;
         $this->events = $events;
         $this->singleSignOn = $singleSignOn;
     }
