@@ -63,6 +63,15 @@ Hoặc bạn phải gắn token vào header.
 'Authorization' => 'Bearer ' . $token
 ```
 
+-Trong trường hợp sử dụng Single page application, khi token trên cookie hết hạn bạn có thể gọi request /oauth2/issueToken để được cấp phát token mới. Nếu có lỗi, hết hạn hoặc bị logout thì sẽ trả về message sau:
+``` php
+[
+    'error'   => true,
+    'data'    => null,
+    'message' => 'Unauthenticated.',
+]
+```
+
 Chỉnh sửa config như sau:
 
 ``` php
