@@ -105,3 +105,9 @@ Việc của bạn là update thông tin cho user đó trong event:
 ``` php
 Redmix0901\Oauth2Sso\Events\UserSsoCreated::class
 ```
+
+Có thể logout bằng link sau: /oauth2/logout hoặc bằng tên route sso.logout 
+
+Có thể login bằng phương thức get link sau: /oauth2/login hoặc bằng tên sso.login.authorization_code
+
+Login with email, password bằng phương thức post: /oauth2/login hoặc bằng tên sso.login.password_grant

@@ -10,6 +10,9 @@ use Redmix0901\Oauth2Sso\Events\UserSsoLogin;
 use Redmix0901\Oauth2Sso\Events\AccessTokenCreated;
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Config\Repository as Config;
+use GuzzleHttp\Client;
+use League\OAuth2\Client\Token\AccessToken;
+use Redmix0901\Oauth2Sso\Http\Requests\ApiLoginRequest;
 
 class OAuth2SsoController extends Controller
 {
@@ -21,13 +24,13 @@ class OAuth2SsoController extends Controller
     protected $events;
 
     /**
-     * @var Redmix0901\Oauth2Sso\SingleSignOn
+     * @var \Redmix0901\Oauth2Sso\SingleSignOn
      */
     protected $singleSignOn;
 
     /**
      *
-     * @var Illuminate\Contracts\Config\\Repository
+     * @var Illuminate\Contracts\Config\Repository
      */
     protected $config;
 
@@ -53,6 +56,38 @@ class OAuth2SsoController extends Controller
         session()->put('callbackUrl', url()->previous());
 
         return $this->singleSignOn->getAuthRedirect();
+    }
+
+    /**
+     * Đăng nhập bằng email, password.
+     *
+     * @return void
+     */
+    public function loginWithCredentials(ApiLoginRequest $request)
+    {
+        $accessToken = $this->singleSignOn->getProvider()->getAccessToken('password', [
+            'username' => $request->get('email'),
+            'password' => $request->get('password')
+        ]);
+
+        $this->singleSignOn->setAccessTokenLocal($accessToken);
+
+        try {
+
+            $resourceOwner = $this->singleSignOn->getUserByToken($accessToken);
+
+            $this->fireEventUserSsoLogin($accessToken, $resourceOwner);
+
+        } catch (IdentityProviderException $e) { }
+
+        $this->fireEventAccessTokenCreated($accessToken);
+
+        return response()->json([
+                'code' => 200,
+                'message' => 'Login successfully',
+                'access_token' => $accessToken->getToken(),
+                'expires_in' => $accessToken->getExpires()
+            ]);
     }
 
     /**
@@ -145,7 +180,8 @@ class OAuth2SsoController extends Controller
 
         return response()
                 ->json([
-                    'error'   => false,
+                    'error' => false,
+                    'token' => $accessToken->getToken(),
                     'message' => 'Succses.',
                 ], 200)
                 ->withCookie(
@@ -181,23 +217,46 @@ class OAuth2SsoController extends Controller
 
             $resourceOwner = $this->singleSignOn->getUserByToken($accessToken);
 
-            $this->events->dispatch(new UserSsoLogin(
-                $this->singleSignOn->retrieveUser(
-                    $resourceOwner->toArray()
-                ),
-                $accessToken
-            ));
+            $this->fireEventUserSsoLogin($accessToken, $resourceOwner);
 
         } catch (IdentityProviderException $e) { }
 
-        $this->events->dispatch(new AccessTokenCreated(
-            $accessToken
-        ));
+        $this->fireEventAccessTokenCreated($accessToken);
 
         $callbackUrl = session()->get('callbackUrl');
         session()->remove('callbackUrl');
 
         return empty($callbackUrl) 
             ? redirect()->intended() : redirect()->to($callbackUrl);
+    }
+
+    /**
+     *
+     * @param League\OAuth2\Client\Token\AccessToken $accessToken
+     *
+     * @return mixed
+     */
+    private function fireEventAccessTokenCreated(AccessToken $accessToken)
+    {
+        $this->events->dispatch(new AccessTokenCreated(
+            $accessToken
+        ));
+    }
+
+    /**
+     *
+     * @param League\OAuth2\Client\Token\AccessToken $accessToken
+     * @param $resourceOwner
+     *
+     * @return mixed
+     */
+    private function fireEventUserSsoLogin(AccessToken $accessToken, $resourceOwner)
+    {
+        $this->events->dispatch(new UserSsoLogin(
+            $this->singleSignOn->retrieveUser(
+                $resourceOwner->toArray()
+            ),
+            $accessToken
+        ));
     }
 }

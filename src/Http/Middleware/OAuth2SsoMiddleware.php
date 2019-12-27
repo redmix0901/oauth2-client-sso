@@ -7,10 +7,10 @@ use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Response;
 use Illuminate\Contracts\Config\Repository as Config;
-use Redmix0901\Oauth2Sso\SingleSignOn;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Request;
+use Redmix0901\Oauth2Sso\SingleSignOn;
 
 class OAuth2SsoMiddleware
 {
@@ -25,13 +25,13 @@ class OAuth2SsoMiddleware
     const ACTION_CREATE_COOKIE = 'cookie';
 
     /** 
-     *@var SingleSignOn 
+     *@var \Redmix0901\Oauth2Sso\SingleSignOn 
      */
     protected $singleSignOn;
 
     /**
      *
-     * @var Illuminate\Contracts\Config\\Repository
+     * @var Illuminate\Contracts\Config\Repository
      */
     protected $config;
 
