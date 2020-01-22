@@ -299,9 +299,10 @@ class SingleSignOn
     {
         $client = new Client(['cookies' => true]);
         $config = $this->config->get('session');
-
+        $oauth2 = $this->config->get('oauth2-sso');
+        
         $cookies = CookieJar::fromArray([
-                    $config['cookie'] => Crypt::encrypt(Cookie::get($config['cookie']), false),
+                    $oauth2['session_id'] => Crypt::encrypt(Cookie::get($oauth2['session_id']), false),
                 ], $config['domain']);
     
         try {
