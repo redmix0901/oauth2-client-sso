@@ -4,6 +4,8 @@ namespace Redmix0901\Oauth2Sso;
 
 use Crypt;
 use Carbon\Carbon;
+use GuzzleHttp\Client;
+use GuzzleHttp\Cookie\CookieJar;
 use League\OAuth2\Client\Token\AccessToken;
 use Redmix0901\Oauth2Sso\OAuth2SsoProvider;
 use Redmix0901\Oauth2Sso\Entities\User;
@@ -12,7 +14,6 @@ use Illuminate\Contracts\Events\Dispatcher;
 use Redmix0901\Oauth2Sso\Events\UserSsoCreated;
 use Redmix0901\Oauth2Sso\Events\RefreshingAccessToken;
 use Illuminate\Contracts\Config\Repository as Config;
-use GuzzleHttp\Cookie\CookieJar;
 
 class SingleSignOn
 {
