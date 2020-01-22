@@ -6,6 +6,7 @@ use Crypt;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
+use Illuminate\Support\Facades\Cookie;
 use League\OAuth2\Client\Token\AccessToken;
 use Redmix0901\Oauth2Sso\OAuth2SsoProvider;
 use Redmix0901\Oauth2Sso\Entities\User;
@@ -300,7 +301,7 @@ class SingleSignOn
         $client = new Client(['cookies' => true]);
         $config = $this->config->get('session');
         $oauth2 = $this->config->get('oauth2-sso');
-        
+
         $cookies = CookieJar::fromArray([
                     $oauth2['session_id'] => Crypt::encrypt(Cookie::get($oauth2['session_id']), false),
                 ], $config['domain']);
