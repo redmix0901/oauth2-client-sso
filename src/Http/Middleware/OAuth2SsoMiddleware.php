@@ -17,7 +17,12 @@ class OAuth2SsoMiddleware
     /** 
      *@var string 
      */
-    const ACTION_REDIRECT = 'redirect';
+    const ACTION_REDIRECT_WITH_ALL = 'redirect_with_all';
+
+    /** 
+     *@var string 
+     */
+    const ACTION_REDIRECT_IF_LOGIN = 'redirect_if_login';
 
     /** 
      *@var string 
@@ -62,7 +67,7 @@ class OAuth2SsoMiddleware
         if (empty($action)) {
             $action = [null];
         }
-
+        
         /** 
          *
          * @var \League\OAuth2\Client\Token\AccessToken $accessToken 
@@ -203,8 +208,26 @@ class OAuth2SsoMiddleware
      */
     protected function redirectTo($request, $response, $action)
     {
-        return  in_array(self::ACTION_REDIRECT, $action) 
-                ? $this->singleSignOn->getAuthRedirect() 
-                    : $this->sendReponse($request, $response, $action) ;
+        /**
+         * Nếu có ACTION_REDIRECT_WITH_ALL trong $action thì sẽ redirect về Server Auth,
+         * 
+         * kể cả đã hoặc chưa đăng nhập Server Auth.
+         */
+        if (in_array(self::ACTION_REDIRECT_WITH_ALL, $action)) {
+            return $this->singleSignOn->getAuthRedirect();
+        }
+
+        /**
+         * Nếu có ACTION_REDIRECT_IF_LOGIN trong $action thì sẽ redirect về Server Auth,
+         * 
+         * khi đã đăng nhập Server Auth.
+         */
+        if (in_array(self::ACTION_REDIRECT_IF_LOGIN, $action)) {
+            if ($this->singleSignOn->checkCookie()) {
+                return $this->singleSignOn->getAuthRedirect();
+            }
+        }
+
+        return $this->sendReponse($request, $response, $action);
     }
 }

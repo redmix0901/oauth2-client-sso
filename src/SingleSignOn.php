@@ -2,6 +2,7 @@
 
 namespace Redmix0901\Oauth2Sso;
 
+use Crypt;
 use Carbon\Carbon;
 use League\OAuth2\Client\Token\AccessToken;
 use Redmix0901\Oauth2Sso\OAuth2SsoProvider;
@@ -10,9 +11,17 @@ use League\OAuth2\Client\Provider\GenericResourceOwner;
 use Illuminate\Contracts\Events\Dispatcher;
 use Redmix0901\Oauth2Sso\Events\UserSsoCreated;
 use Redmix0901\Oauth2Sso\Events\RefreshingAccessToken;
+use Illuminate\Contracts\Config\Repository as Config;
+use GuzzleHttp\Cookie\CookieJar;
 
 class SingleSignOn
 {
+    /**
+     *
+     * @var Illuminate\Contracts\Config\Repository
+     */
+    protected $config;
+
     /** 
      *@var \League\OAuth2\Client\Provider\AbstractProvider 
      */
@@ -45,8 +54,9 @@ class SingleSignOn
      * @param \Redmix0901\Oauth2Sso\OAuth2SsoProvider $provider
      * @param \Illuminate\Contracts\Events\Dispatcher $events
      */
-    public function __construct(OAuth2SsoProvider $provider, Dispatcher $events)
+    public function __construct(OAuth2SsoProvider $provider, Dispatcher $events, Config $config)
     {
+        $this->config = $config;
         $this->provider = $provider;
         $this->events = $events;
     }
@@ -66,7 +76,7 @@ class SingleSignOn
      */
     public function setAccessTokenLocal(AccessToken $token)
     {
-        session()->put('oauth2_session', $token);
+        session()->put(config('oauth2-sso.session_token'), $token);
     }
 
     /**
@@ -75,7 +85,7 @@ class SingleSignOn
      */
     public function getAccessTokenLocal()
     {
-        return session()->get('oauth2_session');
+        return session()->get(config('oauth2-sso.session_token'));
     }
 
     /**
@@ -84,7 +94,7 @@ class SingleSignOn
      */
     public function deleteAccessTokenLocal()
     {
-        session()->remove('oauth2_session');
+        session()->remove(config('oauth2-sso.session_token'));
     }
 
     /**
@@ -277,5 +287,33 @@ class SingleSignOn
         static::$unserializesCookies = false;
 
         return new static;
+    }
+
+    /**
+     * Disable cookie serialization.
+     *
+     * @return bool
+     */
+    public function checkCookie()
+    {
+        $client = new Client(['cookies' => true]);
+        $config = $this->config->get('session');
+
+        $cookies = CookieJar::fromArray([
+                    $config['cookie'] => Crypt::encrypt(Cookie::get($config['cookie']), false),
+                ], $config['domain']);
+    
+        try {
+
+            $res = $client->request('GET', config('oauth2-sso.oauthconf.urlCheckCookie'), [
+                'cookies' => $cookies
+            ]);
+
+            return json_decode($res->getBody(), true);
+
+        } catch (Exception $e) {
+
+            return false;
+        } 
     }
 }
