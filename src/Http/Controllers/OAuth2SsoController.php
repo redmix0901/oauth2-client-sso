@@ -51,9 +51,15 @@ class OAuth2SsoController extends Controller
      *
      * @return void
      */
-    public function login()
+    public function login(Request $request)
     {
-        session()->put('callbackUrl', url()->previous());
+        $callbackUrl = url()->previous();
+
+        if ($request->redirect_uri) {
+            $callbackUrl = $request->redirect_uri;
+        }
+
+        session()->put('callbackUrl', $callbackUrl);
 
         return $this->singleSignOn->getAuthRedirect();
     }

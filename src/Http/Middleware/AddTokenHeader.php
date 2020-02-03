@@ -16,7 +16,7 @@ class AddTokenHeader
      */
     public function handle($request, Closure $next)
     {
-        if (!$request->bearerToken()) {
+        if (! $request->bearerToken()) {
             if ($request->hasCookie(SingleSignOn::$cookie)) {
                 $token = $request->cookie(SingleSignOn::$cookie);
                 $request->headers->add(['Authorization' => 'Bearer ' . $token]);
