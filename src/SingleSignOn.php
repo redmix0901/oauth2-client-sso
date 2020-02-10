@@ -331,6 +331,6 @@ class SingleSignOn
             return true;
         }
 
-        rerturn false;
+        return false;
     }
 }
