@@ -303,7 +303,7 @@ class SingleSignOn
         $oauth2 = $this->config->get('oauth2-sso');
 
         
-        if ($this->shouldCheckCookie()) {
+        if ( Cookie::has($oauth2['session_id']) ) {
             $cookies = CookieJar::fromArray([
                     $oauth2['session_id'] => Crypt::encrypt(Cookie::get($oauth2['session_id']), false),
                 ], $config['domain']);
@@ -325,12 +325,4 @@ class SingleSignOn
         return false;
     }
 
-    private function shouldCheckCookie()
-    {
-        if (Cookie::has($oauth2['session_id'])) {
-            return true;
-        }
-
-        return false;
-    }
 }
