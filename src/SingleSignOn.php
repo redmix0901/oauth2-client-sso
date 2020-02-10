@@ -327,7 +327,7 @@ class SingleSignOn
 
     private function shouldCheckCookie()
     {
-        if (Cookie::has($oauth2['session_id']) {
+        if (Cookie::has($oauth2['session_id'])) {
             return true;
         }
 
