@@ -302,21 +302,35 @@ class SingleSignOn
         $config = $this->config->get('session');
         $oauth2 = $this->config->get('oauth2-sso');
 
-        $cookies = CookieJar::fromArray([
+        
+        if ($this->shouldCheckCookie()) {
+            $cookies = CookieJar::fromArray([
                     $oauth2['session_id'] => Crypt::encrypt(Cookie::get($oauth2['session_id']), false),
                 ], $config['domain']);
-    
-        try {
 
-            $res = $client->request('GET', config('oauth2-sso.oauthconf.urlCheckCookie'), [
-                'cookies' => $cookies
-            ]);
+            try {
 
-            return json_decode($res->getBody(), true);
+                $res = $client->request('GET', config('oauth2-sso.oauthconf.urlCheckCookie'), [
+                    'cookies' => $cookies
+                ]);
 
-        } catch (Exception $e) {
+                return json_decode($res->getBody(), true);
 
-            return false;
-        } 
+            } catch (Exception $e) {
+
+                return false;
+            } 
+        }
+        
+        return false;
+    }
+
+    private function shouldCheckCookie()
+    {
+        if (Cookie::has($oauth2['session_id']) {
+            return true;
+        }
+
+        rerturn false;
     }
 }
