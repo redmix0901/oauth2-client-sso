@@ -209,11 +209,19 @@ class OAuth2SsoController extends Controller
      */
     public function callback(Request $request)
     {
+        \Log::info("(ﾐⓛᆽⓛﾐ)---(ﾐⓛᆽⓛﾐ---(ﾐⓛᆽⓛﾐ)---(ﾐⓛᆽⓛﾐ)---(ﾐⓛᆽⓛﾐ)---(ﾐⓛᆽⓛﾐ)---(ﾐⓛᆽⓛﾐ))");
         if (!$request->has('state') || $request->get('state') !== $request->session()->get('oauth2_auth_state')) {
+            \Log::info("--------------------------------------------");
+            \Log::info("|            Loi o day                     |");
+            \Log::info("--------------------------------------------");
+        }
+        \Log::info('Request state oauth 2 : '. $request->get('state'));
 
-            \Log::info('Request state oauth 2 : '. $request->get('state'));
+        \Log::info('Session state oauth 2 : '. $request->session()->get('oauth2_auth_state'));
 
-            \Log::info('Session state oauth 2 : '. $request->session()->get('oauth2_auth_state'));
+        \Log::info("(ﾐⓛᆽⓛﾐ)---(ﾐⓛᆽⓛﾐ---(ﾐⓛᆽⓛﾐ)---(ﾐⓛᆽⓛﾐ)---(ﾐⓛᆽⓛﾐ)---(ﾐⓛᆽⓛﾐ)---(ﾐⓛᆽⓛﾐ))");
+
+        if (!$request->has('state') || $request->get('state') !== $request->session()->get('oauth2_auth_state')) {
 
             return response('Invalid state', 400);
         }

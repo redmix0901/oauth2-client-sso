@@ -152,6 +152,7 @@ class SingleSignOn
     {
         $authorizationUrl = $this->provider->getAuthorizationUrl();
 
+        session()->remove('oauth2_auth_state');
         session()->put('oauth2_auth_state', $this->provider->getState());
 
         return redirect()->guest($authorizationUrl);
