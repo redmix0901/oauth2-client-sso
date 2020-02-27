@@ -78,7 +78,7 @@ class OAuth2SsoMiddleware
          * Không có $accessToken tồn tại.
          */
         if (!$accessToken) {
-            return $this->redirectTo($request, $next($request), $action);
+            return $this->redirectTo($request, $next, $action);
         }
 
         try {
@@ -102,7 +102,7 @@ class OAuth2SsoMiddleware
              */
             $this->singleSignOn->deleteAccessTokenLocal();
 
-            return $this->redirectTo($request, $next($request), $action);
+            return $this->redirectTo($request, $next, $action);
         }
 
         $user = $resourceOwner->toArray();
@@ -113,12 +113,12 @@ class OAuth2SsoMiddleware
              */
             $this->singleSignOn->deleteAccessTokenLocal();
 
-            return $this->redirectTo($request, $next($request), $action);
+            return $this->redirectTo($request, $next, $action);
         }
         
         $request->attributes->add(['oauth2_user' => $resourceOwner]);
 
-        return $this->sendReponse($request, $next($request), $action);
+        return $this->sendReponse($request, $next, $action);
     }
 
     /**
@@ -131,9 +131,9 @@ class OAuth2SsoMiddleware
      * @param  string[]  ...$action
      * @return \Illuminate\Http\Response
      */
-    protected function sendReponse($request, $response, $action)
+    protected function sendReponse($request, $next, $action)
     {
-        if ($this->shouldReceiveFreshAccessToken($request, $response, $action)) {
+        if ($this->shouldReceiveFreshAccessToken($request, $next, $action)) {
 
             $config = $this->config->get('session');
 
@@ -143,7 +143,7 @@ class OAuth2SsoMiddleware
              */
             $accessToken = $this->singleSignOn->getAccessTokenLocal();
 
-            $response->withCookie(
+            return $next($request)->withCookie(
                 cookie(
                     SingleSignOn::cookie(),
                     $accessToken->getToken(),
@@ -154,7 +154,7 @@ class OAuth2SsoMiddleware
             Cookie::queue(Cookie::forget(SingleSignOn::cookie()));
         }
 
-        return $response;
+        return $next($request);
     }
 
     /**
@@ -165,7 +165,7 @@ class OAuth2SsoMiddleware
      * @param  string[]  ...$action
      * @return bool
      */
-    protected function shouldReceiveFreshAccessToken($request, $response, $action)
+    protected function shouldReceiveFreshAccessToken($request, $next, $action)
     {
         /** 
          *
@@ -206,7 +206,7 @@ class OAuth2SsoMiddleware
      * @param  string[]  ...$action
      * @return redirect
      */
-    protected function redirectTo($request, $response, $action)
+    protected function redirectTo($request, $next, $action)
     {
         /**
          * Nếu có ACTION_REDIRECT_WITH_ALL trong $action thì sẽ redirect về Server Auth,
@@ -228,6 +228,6 @@ class OAuth2SsoMiddleware
             }
         }
 
-        return $this->sendReponse($request, $response, $action);
+        return $this->sendReponse($request, $next, $action);
     }
 }
