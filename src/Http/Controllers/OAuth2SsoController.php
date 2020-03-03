@@ -55,10 +55,14 @@ class OAuth2SsoController extends Controller
     {
         $callbackUrl = url()->previous();
 
-        if ($request->redirect_uri) {
+        if (count($request->all()) > 1) {
+            $_resquest_all = $request->all();
+            unset($_resquest_all['redirect_uri']);
+            $callbackUrl = $request->redirect_uri . '&' . http_build_query($_resquest_all);
+        }else{
             $callbackUrl = $request->redirect_uri;
         }
-
+        
         session()->put('callbackUrl', $callbackUrl);
 
         return $this->singleSignOn->getAuthRedirect();
@@ -257,9 +261,9 @@ class OAuth2SsoController extends Controller
      */
     private function fireEventAccessTokenCreated(AccessToken $accessToken)
     {
-        $this->events->dispatch(new AccessTokenCreated(
-            $accessToken
-        ));
+        $this->events->dispatch(
+            new AccessTokenCreated($accessToken)
+        );
     }
 
     /**
