@@ -215,39 +215,43 @@ class OAuth2SsoController extends Controller
      */
     public function callback(Request $request)
     {
-        \Log::info("(ﾐⓛᆽⓛﾐ)---(ﾐⓛᆽⓛﾐ---(ﾐⓛᆽⓛﾐ)---(ﾐⓛᆽⓛﾐ)---(ﾐⓛᆽⓛﾐ)---(ﾐⓛᆽⓛﾐ)---(ﾐⓛᆽⓛﾐ))");
-        if (!$request->has('state') || $request->get('state') !== $request->session()->get('oauth2_auth_state')) {
-            \Log::info("--------------------------------------------");
-            \Log::info("|            Loi o day                     |");
-            \Log::info("--------------------------------------------");
-        }
-        \Log::info('Request state oauth 2 : '. $request->get('state'));
+        \Log::info("----------------------------------------------------------------");
 
-        \Log::info('Session state oauth 2 : '. $request->session()->get('oauth2_auth_state'));
+        \Log::info('Reques: '. $request->get('state'));
 
-        \Log::info("(ﾐⓛᆽⓛﾐ)---(ﾐⓛᆽⓛﾐ---(ﾐⓛᆽⓛﾐ)---(ﾐⓛᆽⓛﾐ)---(ﾐⓛᆽⓛﾐ)---(ﾐⓛᆽⓛﾐ)---(ﾐⓛᆽⓛﾐ))");
+        \Log::info('Session: '. $request->session()->get('oauth2_auth_state'));
+
+        \Log::info("----------------------------------------------------------------");
 
         if (!$request->has('state') || $request->get('state') !== $request->session()->get('oauth2_auth_state')) {
 
             return response('Invalid state', 400);
         }
 
+        \Log::info('step 1');
+
         $accessToken = $this->singleSignOn->getProvider()->getAccessToken('authorization_code', [
             'code' => $request->get('code'),
         ]);
 
+        \Log::info('step 2');
+
         $this->singleSignOn->setAccessTokenLocal($accessToken);
 
-        try {
+        \Log::info('step 3');
 
-            $resourceOwner = $this->singleSignOn->getUserByToken($accessToken);
+        // try {
 
-            $this->fireEventUserSsoLogin($accessToken, $resourceOwner);
+        //     $resourceOwner = $this->singleSignOn->getUserByToken($accessToken);
 
-        } catch (IdentityProviderException $e) { }
+        //     $this->fireEventUserSsoLogin($accessToken, $resourceOwner);
+
+        // } catch (IdentityProviderException $e) { }
 
         $this->fireEventAccessTokenCreated($accessToken);
 
+        \Log::info('step 4');
+        
         $callbackUrl = session()->get('callbackUrl');
         session()->remove('callbackUrl');
 
