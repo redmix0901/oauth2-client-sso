@@ -78,6 +78,9 @@ class OAuth2SsoMiddleware
          * Không có $accessToken tồn tại.
          */
         if (!$accessToken) {
+            
+            return $this->redirectTo($request, $next, $action);
+
             if (strpos($request->getRequestUri(), 'api') === false) {
                 return $this->redirectTo($request, $next, $action);
             }
