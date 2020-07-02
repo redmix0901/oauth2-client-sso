@@ -96,7 +96,7 @@ class OAuth2SsoMiddleware
             $accessToken = $this->singleSignOn->refreshTokenIfExpired($accessToken);
 
             if (in_array(self::ACTION_CHECK_TOKEN, $action) ) {
-                
+
                 /**
                  * Kiểm tra bằng cách lấy resource owner bằng $accessToken.
                  */
@@ -113,7 +113,7 @@ class OAuth2SsoMiddleware
             return $this->redirectTo($request, $next, $action);
         }
 
-        $user = $resourceOwner->toArray();
+        $user = isset($resourceOwner) ? $resourceOwner->toArray() : [];
 
         if (isset($user['message']) && $user['message'] == 'Unauthenticated.') {
             /**
