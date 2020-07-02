@@ -30,6 +30,11 @@ class OAuth2SsoMiddleware
     const ACTION_CREATE_COOKIE = 'cookie';
 
     /** 
+     *@var string 
+     */
+    const ACTION_CHECK_TOKEN = 'check_token';
+
+    /** 
      *@var \Redmix0901\Oauth2Sso\SingleSignOn 
      */
     protected $singleSignOn;
@@ -78,19 +83,7 @@ class OAuth2SsoMiddleware
          * Không có $accessToken tồn tại.
          */
         if (!$accessToken) {
-            
             return $this->redirectTo($request, $next, $action);
-
-            if (strpos($request->getRequestUri(), 'api') === false) {
-                return $this->redirectTo($request, $next, $action);
-            }
-
-            $response_data = [
-                'status' => 302,
-                'link'   => $this->redirectTo($request, $next, $action),
-            ];
-
-            return response()->json($response_data, 200);
         }
 
         try {
@@ -102,10 +95,13 @@ class OAuth2SsoMiddleware
              */
             $accessToken = $this->singleSignOn->refreshTokenIfExpired($accessToken);
 
-            /**
-             * Kiểm tra bằng cách lấy resource owner bằng $accessToken.
-             */
-            $resourceOwner = $this->singleSignOn->getUserByToken($accessToken);
+            if (in_array(self::ACTION_CHECK_TOKEN, $action) ) {
+                
+                /**
+                 * Kiểm tra bằng cách lấy resource owner bằng $accessToken.
+                 */
+                $resourceOwner = $this->singleSignOn->getUserByToken($accessToken);
+            }
 
         } catch (IdentityProviderException $e) {
 
