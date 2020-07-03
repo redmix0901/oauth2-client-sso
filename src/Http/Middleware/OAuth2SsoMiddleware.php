@@ -124,7 +124,7 @@ class OAuth2SsoMiddleware
             return $this->redirectTo($request, $next, $action);
         }
         
-        $request->attributes->add(['oauth2_user' => $resourceOwner]);
+        $request->attributes->add(['oauth2_user' => $resourceOwner ?? null]);
 
         return $this->sendReponse($request, $next, $action);
     }
