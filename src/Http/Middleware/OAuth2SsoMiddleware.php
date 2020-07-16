@@ -69,6 +69,10 @@ class OAuth2SsoMiddleware
      */
     public function handle($request, Closure $next, ...$action)
     {
+        if (session()->get('oauth2_auth_state')) {
+            return $next($request);
+        }
+
         if (empty($action)) {
             $action = [null];
         }

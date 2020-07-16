@@ -217,17 +217,19 @@ class OAuth2SsoController extends Controller
     {
         \Log::info("----------------------------------------------------------------");
 
-        \Log::info('Reques: '. $request->get('state'));
+        \Log::info('Request: '. $request->get('state'));
 
         \Log::info('Session: '. $request->session()->get('oauth2_auth_state'));
 
         \Log::info("----------------------------------------------------------------");
 
         if (!$request->has('state') || $request->get('state') !== $request->session()->get('oauth2_auth_state')) {
-
+            session()->remove('oauth2_auth_state');
             return response('Invalid state', 400);
         }
 
+        session()->remove('oauth2_auth_state');
+        
         \Log::info('step 1');
 
         $accessToken = $this->singleSignOn->getProvider()->getAccessToken('authorization_code', [
