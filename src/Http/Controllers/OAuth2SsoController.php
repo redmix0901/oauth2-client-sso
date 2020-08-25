@@ -215,32 +215,26 @@ class OAuth2SsoController extends Controller
      */
     public function callback(Request $request)
     {
-        \Log::info("----------------------------------------------------------------");
+        $callbackUrl = session()->get('callbackUrl');
+        session()->remove('callbackUrl');
 
-        \Log::info('Request: '. $request->get('state'));
+        if (!$request->has('state') || $request->get('state') !== session()->get('oauth2_auth_state')) {
 
-        \Log::info('Session: '. $request->session()->get('oauth2_auth_state'));
-
-        \Log::info("----------------------------------------------------------------");
-
-        if (!$request->has('state') || $request->get('state') !== $request->session()->get('oauth2_auth_state')) {
             session()->remove('oauth2_auth_state');
-            return response('Invalid state', 400);
+            \Log::info('request invalid');
+
+            return redirect()->intended($callbackUrl);
         }
 
         session()->remove('oauth2_auth_state');
-        
-        \Log::info('step 1');
+
+        \Log::info('step 1: getAccessToken via code - ' . $request->get('code'));
 
         $accessToken = $this->singleSignOn->getProvider()->getAccessToken('authorization_code', [
             'code' => $request->get('code'),
         ]);
 
-        \Log::info('step 2');
-
         $this->singleSignOn->setAccessTokenLocal($accessToken);
-
-        \Log::info('step 3');
 
         // try {
 
@@ -252,13 +246,9 @@ class OAuth2SsoController extends Controller
 
         $this->fireEventAccessTokenCreated($accessToken);
 
-        \Log::info('step 4');
-        
-        $callbackUrl = session()->get('callbackUrl');
-        session()->remove('callbackUrl');
+        \Log::info('step 2: callback '. session()->pull('url.intended', $callbackUrl));
 
-        return empty($callbackUrl) 
-            ? redirect()->intended() : redirect()->to($callbackUrl);
+        return redirect()->intended($callbackUrl);
     }
 
     /**
