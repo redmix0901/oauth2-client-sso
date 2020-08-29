@@ -2,7 +2,6 @@
 
 namespace Redmix0901\Oauth2Sso;
 
-use Crypt;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
@@ -15,9 +14,18 @@ use Illuminate\Contracts\Events\Dispatcher;
 use Redmix0901\Oauth2Sso\Events\UserSsoCreated;
 use Redmix0901\Oauth2Sso\Events\RefreshingAccessToken;
 use Illuminate\Contracts\Config\Repository as Config;
+use Illuminate\Cookie\CookieValuePrefix;
+use Illuminate\Contracts\Encryption\Encrypter as EncrypterContract;
 
 class SingleSignOn
 {
+    /**
+     * The encrypter instance.
+     *
+     * @var \Illuminate\Contracts\Encryption\Encrypter
+     */
+    protected $encrypter;
+
     /**
      *
      * @var Illuminate\Contracts\Config\Repository
@@ -56,11 +64,12 @@ class SingleSignOn
      * @param \Redmix0901\Oauth2Sso\OAuth2SsoProvider $provider
      * @param \Illuminate\Contracts\Events\Dispatcher $events
      */
-    public function __construct(OAuth2SsoProvider $provider, Dispatcher $events, Config $config)
+    public function __construct(OAuth2SsoProvider $provider, Dispatcher $events, Config $config, EncrypterContract $encrypter)
     {
         $this->config = $config;
         $this->provider = $provider;
         $this->events = $events;
+        $this->encrypter = $encrypter;
     }
 
     /**
@@ -303,11 +312,18 @@ class SingleSignOn
         $config = $this->config->get('session');
         $oauth2 = $this->config->get('oauth2-sso');
 
-        
-        if ( Cookie::has($oauth2['session_id']) ) {
+        if (Cookie::has($oauth2['session_id']) && class_exists('Illuminate\Cookie\CookieValuePrefix')) {
+
+            $cookieValuePrefix = CookieValuePrefix::create($oauth2['session_id'], $this->encrypter->getKey()); 
+
+            $cookieValue = $this->encrypter->encrypt(
+                $cookieValuePrefix . Cookie::get($oauth2['session_id']), false
+            );
+
             $cookies = CookieJar::fromArray([
-                    $oauth2['session_id'] => Crypt::encrypt(Cookie::get($oauth2['session_id']), false),
-                ], $config['domain']);
+                    $oauth2['session_id'] => $cookieValue,
+                ], $config['domain']
+            );
 
             try {
 
@@ -325,5 +341,4 @@ class SingleSignOn
         
         return false;
     }
-
 }
