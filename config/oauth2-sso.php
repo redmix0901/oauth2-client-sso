@@ -11,6 +11,7 @@ return [
         'urlCheckCookie' => env('OAUTH2_URL_CHECK_COOKIE'), //'https://accounts.topdev.vn/checkCookie',
         'urlResourceOwnerDetails' => env('OAUTH2_URL_RESOURCE_OWNER'), //'https://accounts.topdev.vn/api/v1/user',
     ],
+    'prefix_route' => null,
     'session_id' => env('SESSION_ID', 'TDSID'),
     'session_token' => env('SESSION_TOKEN', 'oauth2_session'),
     'mapingUser' => true,
