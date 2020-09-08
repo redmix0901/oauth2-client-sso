@@ -159,7 +159,9 @@ class OAuth2SsoMiddleware
                 cookie(
                     SingleSignOn::cookie(),
                     $accessToken->getToken(),
-                    $config['lifetime']
+                    $config['lifetime'],
+                    $config['path'], 
+                    $config['domain']
                 )
             );
         } elseif (Request::hasCookie(SingleSignOn::cookie())) {
