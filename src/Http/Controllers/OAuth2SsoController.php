@@ -65,7 +65,7 @@ class OAuth2SsoController extends Controller
             }
         }
 
-        session()->put('callbackUrl', $callbackUrl);
+        $this->singleSignOn->setCallbackUrl($callbackUrl);
 
         return $this->singleSignOn->getAuthRedirect();
     }
@@ -215,8 +215,7 @@ class OAuth2SsoController extends Controller
      */
     public function callback(Request $request)
     {
-        $callbackUrl = session()->get('callbackUrl');
-        session()->remove('callbackUrl');
+        $callbackUrl = $this->singleSignOn->getCallbackUrl();
 
         if (!$request->has('state') || $request->get('state') !== session()->get('oauth2_auth_state')) {
 

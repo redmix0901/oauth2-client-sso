@@ -108,6 +108,24 @@ class SingleSignOn
         session()->remove(config('oauth2-sso.session_token'));
     }
 
+    public function setCallbackUrl($callbackUrl = '/')
+    {
+        session()->put('callbackUrl', $callbackUrl);
+    }
+
+    public function getCallbackUrl()
+    {
+        $callbackUrl = session()->get('callbackUrl');
+        $this->deleteCallbackUrl();
+
+        return $callbackUrl;
+    }
+
+    public function deleteCallbackUrl()
+    {
+        session()->remove('callbackUrl');
+    }
+
     /**
      * Lấy thông tin user bằng $token
      *

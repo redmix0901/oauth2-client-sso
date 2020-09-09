@@ -228,6 +228,7 @@ class OAuth2SsoMiddleware
          * kể cả đã hoặc chưa đăng nhập Server Auth.
          */
         if (in_array(self::ACTION_REDIRECT_WITH_ALL, $action)) {
+            $this->singleSignOn->setCallbackUrl(url()->current());
             return $this->singleSignOn->getAuthRedirect();
         }
 
@@ -238,6 +239,7 @@ class OAuth2SsoMiddleware
          */
         if (in_array(self::ACTION_REDIRECT_IF_LOGIN, $action)) {
             if ($this->singleSignOn->checkCookie()) {
+                $this->singleSignOn->setCallbackUrl(url()->current());
                 return $this->singleSignOn->getAuthRedirect();
             }
         }
