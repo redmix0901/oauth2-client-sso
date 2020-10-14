@@ -161,7 +161,9 @@ class OAuth2SsoMiddleware
                     $accessToken->getToken(),
                     $config['lifetime'],
                     $config['path'], 
-                    $config['domain']
+                    $config['domain'],
+                    $config['secure'],
+                    false,
                 )
             );
         } elseif (Request::hasCookie(SingleSignOn::cookie())) {
@@ -228,7 +230,7 @@ class OAuth2SsoMiddleware
          * kể cả đã hoặc chưa đăng nhập Server Auth.
          */
         if (in_array(self::ACTION_REDIRECT_WITH_ALL, $action)) {
-            $this->singleSignOn->setCallbackUrl(url()->current());
+            $this->singleSignOn->setCallbackUrl(url()->full());
             return $this->singleSignOn->getAuthRedirect();
         }
 
@@ -239,7 +241,7 @@ class OAuth2SsoMiddleware
          */
         if (in_array(self::ACTION_REDIRECT_IF_LOGIN, $action)) {
             if ($this->singleSignOn->checkCookie()) {
-                $this->singleSignOn->setCallbackUrl(url()->current());
+                $this->singleSignOn->setCallbackUrl(url()->full());
                 return $this->singleSignOn->getAuthRedirect();
             }
         }
