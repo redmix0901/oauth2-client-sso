@@ -9,9 +9,12 @@ use Illuminate\Http\Request;
 use Illuminate\Contracts\Encryption\Encrypter;
 use Redmix0901\Oauth2Sso\SingleSignOn;
 use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Auth\GuardHelpers;
 
 class SsoGuard
 {
+    use GuardHelpers;
+
     /** 
      *@var SingleSignOn 
      */
@@ -57,6 +60,13 @@ class SsoGuard
      */
     protected function authenticateViaOauthServer($token)
     {
+        // Nếu chúng tôi đã truy xuất người dùng cho yêu cầu hiện tại, chúng tôi chỉ có thể
+        // trả lại ngay lập tức. Chúng tôi không muốn lấy dữ liệu người dùng trên
+        // mọi cuộc gọi đến phương thức này bởi vì điều đó sẽ rất chậm
+        if (! is_null($this->user)) {
+            return $this->user;
+        }
+
         $client = new Client();
 
         try {
@@ -87,12 +97,10 @@ class SsoGuard
     protected function getTokenViaCookie($request)
     {
         try {
-
             $token = Crypt::decrypt(
                 Cookie::get(SingleSignOn::cookie()), 
                 SingleSignOn::$unserializesCookies
             );
-
         } catch (DecryptException $e) {
             return;
         }
