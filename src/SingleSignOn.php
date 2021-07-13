@@ -284,15 +284,9 @@ class SingleSignOn
      * @param  string|null  $cookie
      * @return string|static
      */
-    public static function cookie($cookie = null)
+    public static function cookie()
     {
-        if (is_null($cookie)) {
-            return static::$cookie;
-        }
-
-        static::$cookie = $cookie;
-
-        return new static;
+        return config('oauth2-sso.cookie_token');
     }
 
     /**
