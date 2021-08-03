@@ -2,17 +2,19 @@
 
 namespace Redmix0901\Oauth2Sso\Http\Controllers;
 
+use Carbon\Carbon;
+use GuzzleHttp\Client;
 use Illuminate\Http\Request;
-use Redmix0901\Oauth2Sso\SingleSignOn;
 use App\Http\Controllers\Controller;
-use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
+use Illuminate\Support\Facades\Cookie;
+use Redmix0901\Oauth2Sso\SingleSignOn;
+use Illuminate\Contracts\Events\Dispatcher;
+use League\OAuth2\Client\Token\AccessToken;
 use Redmix0901\Oauth2Sso\Events\UserSsoLogin;
 use Redmix0901\Oauth2Sso\Events\AccessTokenCreated;
-use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Config\Repository as Config;
-use GuzzleHttp\Client;
-use League\OAuth2\Client\Token\AccessToken;
 use Redmix0901\Oauth2Sso\Http\Requests\ApiLoginRequest;
+use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 
 class OAuth2SsoController extends Controller
 {
@@ -246,8 +248,23 @@ class OAuth2SsoController extends Controller
         $this->fireEventAccessTokenCreated($accessToken);
 
         \Log::info('step 2: callback '. session()->pull('url.intended', $callbackUrl));
+        
+        $config = config('session');
+        $expiration = Carbon::now()->addMinutes($config['lifetime']);
 
-        return redirect()->intended($callbackUrl);
+        $cookie = new Cookie(
+            SingleSignOn::cookie(),
+            $accessToken->getToken(),
+            $expiration,
+            $config['path'],
+            $config['domain'],
+            $config['secure'],
+            false,
+            false,
+            $config['same_site'] ?? null
+        );
+
+        return redirect()->intended($callbackUrl)->withCookie($cookie);
     }
 
     /**
