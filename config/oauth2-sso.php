@@ -13,7 +13,7 @@ return [
     ],
     'prefix_route' => null,
     'session_id' => env('SESSION_ID', 'TDSID'),
-    'cookie_token' => env('COOKIE_TOKEN', 'TDET'),
+    'cookie_token' => env('COOKIE_TOKEN', 'topdev_token'),
     'session_token' => env('SESSION_TOKEN', 'oauth2_session'),
     'mapingUser' => true,
     'mapColumn' => 'email' // email, username
