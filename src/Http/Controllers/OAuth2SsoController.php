@@ -6,7 +6,7 @@ use Carbon\Carbon;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Cookie;
+use Symfony\Component\HttpFoundation\Cookie;
 use Redmix0901\Oauth2Sso\SingleSignOn;
 use Illuminate\Contracts\Events\Dispatcher;
 use League\OAuth2\Client\Token\AccessToken;
