@@ -178,6 +178,7 @@ class SingleSignOn
     public function getAuthRedirect()
     {
         $authorizationUrl = $this->provider->getAuthorizationUrl();
+        $authorizationUrl = $this->appendCustomQuery($authorizationUrl, request()->all());
 
         session()->remove('oauth2_auth_state');
         session()->put('oauth2_auth_state', $this->provider->getState());
@@ -352,5 +353,33 @@ class SingleSignOn
         }
         
         return false;
+    }
+
+    /**
+     * Appends a query string to a URL.
+     *
+     * @param  string $url The URL to append the query to
+     * @param  string $options array
+     * @return string The resulting URL
+     */
+    protected function appendCustomQuery($url, $options)
+    {
+        $addCustomOptions = config('oauth2-sso.add_key_params_authorize');
+        if(empty($addCustomOptions))
+        {
+            return $url;
+        }
+
+        $options = collect($options)->only(is_array($addCustomOptions) ? implode(',', $addCustomOptions) : $addCustomOptions)->all();
+
+        $query = http_build_query($options, null, '&', \PHP_QUERY_RFC3986);
+        $query = trim($query, '?&');
+
+        if ($query) {
+            $glue = strstr($url, '?') === false ? '?' : '&';
+            return $url . $glue . $query;
+        }
+
+        return $url;
     }
 }
