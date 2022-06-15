@@ -202,7 +202,13 @@ class OAuth2SsoController extends Controller
                     cookie(
                         SingleSignOn::cookie(),
                         $accessToken->getToken(),
-                        $config['lifetime']
+                        $config['lifetime'],
+                        $config['path'], 
+                        $config['domain'],
+                        $config['secure'],
+                        false,
+                        false,
+                        $config['same_site'] ?? null
                     )
                 );
     }
@@ -220,16 +226,11 @@ class OAuth2SsoController extends Controller
         $callbackUrl = $this->singleSignOn->getCallbackUrl();
 
         if (!$request->has('state') || $request->get('state') !== session()->get('oauth2_auth_state')) {
-
             session()->remove('oauth2_auth_state');
-            \Log::info('request invalid');
-
             return redirect()->intended($callbackUrl);
         }
 
         session()->remove('oauth2_auth_state');
-
-        \Log::info('step 1: getAccessToken via code - ' . $request->get('code'));
 
         $accessToken = $this->singleSignOn->getProvider()->getAccessToken('authorization_code', [
             'code' => $request->get('code'),
@@ -246,8 +247,6 @@ class OAuth2SsoController extends Controller
         // } catch (IdentityProviderException $e) { }
 
         $this->fireEventAccessTokenCreated($accessToken);
-
-        \Log::info('step 2: callback '. session()->pull('url.intended', $callbackUrl));
         
         $config = config('session');
         $expiration = Carbon::now()->addMinutes($config['lifetime']);
